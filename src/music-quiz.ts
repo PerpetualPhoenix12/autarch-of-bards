@@ -8,6 +8,7 @@ import { Song } from 'song'
 import { VoiceConnection } from 'discord.js'
 import internal from 'stream'
 import { StreamDispatcher } from 'discord.js';
+import { Video } from 'scrape-youtube/lib/interface';
 
 const stopCommand = '!stop'
 const skipCommand = '!skip'
@@ -78,7 +79,7 @@ export class MusicQuiz {
 
             - GLHF :microphone:
         `.replace(/  +/g, ''))
-        await this.youtube.getProxies()
+        // await this.youtube.getProxies()
         this.startPlaying()
 
         this.messageCollector = this.textChannel
@@ -96,22 +97,29 @@ export class MusicQuiz {
         }
 
         const song = this.songs[this.currentSong]
-        const link = await this.getSongLink(song)
-        if (!link) {
-            this.nextSong('Could not find the song on Youtube. Skipping to next.')
+        const links = await this.getSongLinks(song)
 
-            return
+        if (links.length == 0) {
+          this.nextSong('Could not find the song on Youtube. Skipping to next.')
+          return
         }
 
-        try {
-            this.musicStream = await ytdl(link)
-        } catch (e) {
-            console.error(e);
-
-            this.nextSong('Could not stream the song from Youtube. Skipping to next.')
-
-            return
+        for (let link of links) {
+          try {
+            this.musicStream = await ytdl(link);
+            break;
+          } catch (e) {
+            console.log(e);
+          }
         }
+
+        if (!this.musicStream) {
+          this.nextSong('fucked');
+          return;
+        }
+
+        console.log(links);
+
 
         this.songTimeout = setTimeout(() => {
             this.nextSong('Song was not guessed in time')
@@ -137,6 +145,7 @@ export class MusicQuiz {
     }
 
     async handleMessage(message: CommandoMessage) {
+
         const content = message.content.toLowerCase()
         if (content === stopCommand) {
             await this.printStatus('Quiz stopped!')
@@ -155,7 +164,7 @@ export class MusicQuiz {
         let score = this.scores[message.author.id] || 0
         let correct = false
 
-        if (!this.titleGuessed && content.includes(song.title.toLowerCase())) {
+        if (!this.titleGuessed && content.includes(this.stripSongName(song.title).toLowerCase())) {
             score = score + 2
             this.titleGuessed = true
             correct = true
@@ -209,8 +218,8 @@ export class MusicQuiz {
 
     nextSong(status: string) {
         if (this.songTimeout) clearTimeout(this.songTimeout)
-        this.printStatus(status)
-
+        status == "fucked" ? this.songs.splice(this.currentSong, 1) : this.printStatus(status)
+          
         if (this.currentSong + 1 === this.songs.length) {
             return this.finish()
         }
@@ -286,7 +295,7 @@ export class MusicQuiz {
                 .map(song => ({
                     link: `https://open.spotify.com/track/${song.id}`,
                     previewUrl: song.preview_url,
-                    title: this.stripSongName(song.name),
+                    title: song.name,
                     artist: (song.artists[0] || {}).name
                 }))
         } catch (error) {
@@ -296,9 +305,10 @@ export class MusicQuiz {
         }
     }
 
-    async getSongLink(song: Song): Promise<string> {
+    async getSongLinks(song: Song): Promise<string[]> {
+        console.log(`${song.title} - ${song.artist}`);
         try {
-            return await this.youtube.findSong(`${song.title} - ${song.artist}`)
+            return await this.youtube.findSongs(`${song.title} - ${song.artist}`)
         } catch (e) {
             await this.textChannel.send('Oh no... Youtube police busted the party :(\nPlease try again later.')
             await this.finish()
@@ -317,7 +327,9 @@ export class MusicQuiz {
      */
     stripSongName(name: string): string {
         return name.replace(/ \(.*\)/g, '')
-            .replace(/ - .*$/, '')
+             .replace(/ - .*$/, '')
+             .replace(/[?!,.]/g, '')
+
     }
 
     pointText(): string {
