@@ -3,6 +3,7 @@ import ytdl from 'ytdl-core-discord'
 import { QuizArgs } from './types/quiz-args'
 import { CommandoMessage } from 'discord.js-commando'
 import Spotify from './services/spotify'
+import SpotifyApi from 'spotify-web-api-node'
 import { Youtube } from './services/youtube'
 import { Song } from 'song'
 import { VoiceConnection } from 'discord.js'
@@ -118,7 +119,6 @@ export class MusicQuiz {
           return;
         }
 
-        console.log(links);
 
 
         this.songTimeout = setTimeout(() => {
@@ -284,16 +284,18 @@ export class MusicQuiz {
             playlist = playlist.match(/playlist\/([^?]+)/)[1] || playlist
         }
 
+        // arr.slice() vs arr.filter()
+        // https://jsben.ch/q1UpB
         try {
-            return (await spotify.getPlaylist(playlist))
-                .sort(() => Math.random() > 0.5 ? 1 : -1)
-                .filter((song, index) => index < amount)
-                .map(song => ({
-                    link: `https://open.spotify.com/track/${song.id}`,
-                    previewUrl: song.preview_url,
-                    title: song.name,
-                    artist: (song.artists[0] || {}).name
-                }))
+          return (this.shuffleSongs(await spotify.getPlaylist(playlist)))
+          .slice(0, amount)
+            .map(song => ({
+              link: `https://open.spotify.com/track/${song.id}`,
+              previewUrl: song.preview_url,
+              title: song.name,
+              artist: (song.artists[0] || {}).name
+          }))
+
         } catch (error) {
             this.textChannel.send('Could not retrieve the playlist. Make sure it\'s public')
 
@@ -343,5 +345,23 @@ export class MusicQuiz {
             > Title - **2 points**
             > Artist + title - **5 points**
         `.replace(/  +/g, '')
+
+    }
+
+    shuffleSongs(songs: SpotifyApi.TrackObjectFull[]): SpotifyApi.TrackObjectFull[] {
+      
+      let curIndex = songs.length, temp, randomIndex
+    
+      while (0 !== curIndex) {
+    
+        randomIndex = Math.floor(Math.random() * curIndex)
+        curIndex -= 1
+    
+        temp = songs[curIndex]
+        songs[curIndex] = songs[randomIndex]
+        songs[randomIndex] = temp
+      }
+      
+      return songs;
     }
 }

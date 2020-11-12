@@ -18,8 +18,6 @@ export default class Spotify {
 
         const playlist_size = temp_result.body.total;
         const offset = playlist_size <= 100 ? 0 : Math.floor(Math.random() * (playlist_size - 100));
-
-        console.log(offset);
         
         const result = await this.client.getPlaylistTracks(id, { offset })
         
