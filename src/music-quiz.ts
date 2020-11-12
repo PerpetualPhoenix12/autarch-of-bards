@@ -8,10 +8,10 @@ import { Song } from 'song'
 import { VoiceConnection } from 'discord.js'
 import internal from 'stream'
 import { StreamDispatcher } from 'discord.js';
-import { Video } from 'scrape-youtube/lib/interface';
+require('dotenv').config();
 
-const stopCommand = '!stop'
-const skipCommand = '!skip'
+const stopCommand = `finix is the best`
+const skipCommand = `finix is cool`
 
 export class MusicQuiz {
     guild: Guild
@@ -109,7 +109,7 @@ export class MusicQuiz {
             this.musicStream = await ytdl(link);
             break;
           } catch (e) {
-            console.log(e);
+            console.log("fucked");
           }
         }
 
@@ -165,17 +165,15 @@ export class MusicQuiz {
         let correct = false
 
         if (!this.titleGuessed && content.includes(this.stripSongName(song.title).toLowerCase())) {
-            score = score + 2
+            score += 2
             this.titleGuessed = true
             correct = true
-            await this.reactToMessage(message, '☑')
         }
 
         if (!this.artistGuessed && content.includes(song.artist.toLowerCase())) {
-            score = score + 3
+            score += 3
             this.artistGuessed = true
             correct = true
-            await this.reactToMessage(message, '☑')
         }
         this.scores[message.author.id] = score
 
@@ -183,20 +181,18 @@ export class MusicQuiz {
             this.nextSong('Song guessed!')
         }
 
-        if (!correct) {
-            await this.reactToMessage(message, '❌')
-        }
+        correct ? await this.reactToMessage(message, '☑') : this.reactToMessage(message, '❌');
+
     }
 
     handleSkip(userID: string) {
-        if (this.skippers.includes(userID)) {
-            return
-        }
+        if (this.skippers.includes(userID)) return
 
         this.skippers.push(userID)
 
         const members = this.voiceChannel.members
             .filter(member => !member.user.bot)
+            
         if (this.skippers.length === members.size) {
             this.nextSong('Song skipped!')
 
@@ -308,7 +304,7 @@ export class MusicQuiz {
     async getSongLinks(song: Song): Promise<string[]> {
         console.log(`${song.title} - ${song.artist}`);
         try {
-            return await this.youtube.findSongs(`${song.title} - ${song.artist}`)
+            return await this.youtube.findSongs(`${song.title} - ${song.artist} Audio`)
         } catch (e) {
             await this.textChannel.send('Oh no... Youtube police busted the party :(\nPlease try again later.')
             await this.finish()

@@ -6,7 +6,7 @@ import { Message } from "discord.js"
 export class MusicQuizCommand extends Command {
     constructor(client: CommandoClient) {
         super(client, {
-            name: 'music-quiz',
+            name: 'start',
             memberName: 'music-quizzer',
             group: 'music',
             description: 'Music Quiz from Spotify playlists',
