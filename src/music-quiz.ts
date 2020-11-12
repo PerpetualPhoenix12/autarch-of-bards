@@ -327,7 +327,7 @@ export class MusicQuiz {
         return name.replace(/ \(.*\)/g, '')
              .replace(/ - .*$/, '')
              .replace(/[?!,.]/g, '')
-
+             .replace(/&/g, 'and')
     }
 
     pointText(): string {
