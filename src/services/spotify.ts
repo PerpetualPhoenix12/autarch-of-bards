@@ -14,13 +14,23 @@ export default class Spotify {
     }
 
     async getPlaylist(id: string) {
-        const temp_result = await this.client.getPlaylistTracks(id)
+        let all_tracks = new Array();
+        const initial_response = await this.client.getPlaylistTracks(id)
+        
+        all_tracks = all_tracks.concat(initial_response.body.items);
 
-        const playlist_size = temp_result.body.total;
-        const offset = playlist_size <= 100 ? 0 : Math.floor(Math.random() * (playlist_size - 100));
+        const playlist_size = initial_response.body.total;
+        const chunks = Math.ceil(playlist_size / 100)
+        for (let i=1; i<chunks; i++) {
+          const response = await this.client.getPlaylistTracks(id, { offset: i * 100 });
+          all_tracks = all_tracks.concat(response.body.items);
+        }
         
-        const result = await this.client.getPlaylistTracks(id, { offset })
+        return all_tracks;
         
-        return result.body.items;
+        
+       
+        
+        
     }
 }
