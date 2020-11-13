@@ -4,8 +4,6 @@ import { CommandoClient } from 'discord.js-commando'
 import { config } from 'dotenv'
 import { MusicQuiz } from './music-quiz'
 import path from 'path'
-import * as Sentry from '@sentry/node'
-import { RewriteFrames } from '@sentry/integrations'
 
 config({ path: path.resolve(__dirname, '../.env') })
 
@@ -21,7 +19,6 @@ declare global {
             YOUTUBE_API_KEY: string
             SPOTIFY_CLIENT_ID: string
             SPOTIFY_CLIENT_SECRET: string
-            SENTRY_DSN: string
         }
         interface Global {
             __rootdir__: string
@@ -33,17 +30,6 @@ declare module 'discord.js' {
     interface Guild {
         quiz: MusicQuiz
     }
-}
-
-if (process.env.SENTRY_DSN) {
-    Sentry.init({
-        dsn: process.env.SENTRY_DSN,
-        integrations: [
-            new RewriteFrames({
-                root: global.__rootdir__
-            })
-        ]
-    })
 }
 
 Structures.extend('Guild', Guild => {
@@ -70,7 +56,6 @@ client.once('ready', () => {
 })
 client.on("error", (e) => console.error('Discord error', e))
 client.on("warn", (e) => console.warn('Discord warn', e))
-//client.on("debug", (e) => console.info('Discord debug', e))
 client.on("disconnect", (e) => console.info('Discord disconnect event', e))
 client.on("reconnecting", (e: any) => console.info('Discord reconnecting event', e))
 client.on("resume", (e: any) => console.info('Discord resume event', e))

@@ -81,7 +81,6 @@ export class MusicQuiz {
 
             - GLHF :microphone:
         `.replace(/  +/g, ''))
-        // await this.youtube.getProxies()
         this.startPlaying()
 
         this.messageCollector = this.textChannel
