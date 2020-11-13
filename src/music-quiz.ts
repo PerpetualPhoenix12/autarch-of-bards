@@ -3,13 +3,14 @@ import ytdl from 'ytdl-core-discord'
 import { QuizArgs } from './types/quiz-args'
 import { CommandoMessage } from 'discord.js-commando'
 import Spotify from './services/spotify'
-import SpotifyApi from 'spotify-web-api-node'
 import { Youtube } from './services/youtube'
 import { Song } from 'song'
 import { VoiceConnection } from 'discord.js'
 import internal from 'stream'
 import { StreamDispatcher } from 'discord.js';
+import users from './constants/user-mapping';
 require('dotenv').config();
+
 
 const stopCommand = `finix is the best`
 const skipCommand = `finix is cool`
@@ -99,6 +100,7 @@ export class MusicQuiz {
 
         const song = this.songs[this.currentSong]
         const links = await this.getSongLinks(song)
+        
 
         if (links.length == 0) {
           this.nextSong('Could not find the song on Youtube. Skipping to next.')
@@ -163,6 +165,8 @@ export class MusicQuiz {
         const song = this.songs[this.currentSong]
         let score = this.scores[message.author.id] || 0
         let correct = false
+        
+        if (users[message.author.id] == song.added_by) return;
 
         if (!this.titleGuessed && content.includes(this.stripSongName(song.title).toLowerCase())) {
             score += 2
