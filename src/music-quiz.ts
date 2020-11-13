@@ -31,6 +31,7 @@ export class MusicQuiz {
     musicStream: internal.Readable
     voiceStream: StreamDispatcher
     songTimeout: NodeJS.Timeout
+    hintTimeout: NodeJS.Timeout
     reactPermissionNotified: boolean = false
     youtube: Youtube
 
@@ -126,6 +127,14 @@ export class MusicQuiz {
             this.nextSong('Song was not guessed in time')
         }, 1000 * 60);
 
+        this.hintTimeout = setTimeout(() => {
+          const artist_hint = `${this.makeHint(song.artist)} (${song.artist.length})`;
+          const song_hint = `${this.makeHint(song.stripped_title)} (${song.stripped_title.length})`;
+          this.textChannel.send(this.formatHints(artist_hint, song_hint));
+        }, 1000 * 40);
+
+
+
         try {
             this.voiceStream = this.connection.play(this.musicStream, { type: 'opus', volume: .5 })
 
@@ -167,7 +176,7 @@ export class MusicQuiz {
         
         if (users[message.author.id] == song.added_by && this.arguments.only == 'author') return;
 
-        if (!this.titleGuessed && content.includes(this.stripSongName(song.title).toLowerCase())) {
+        if (!this.titleGuessed && content.includes(song.stripped_title.toLowerCase())) {
             score += 2
             this.titleGuessed = true
             correct = true
@@ -207,6 +216,7 @@ export class MusicQuiz {
 
     async finish() {
         if (this.songTimeout) clearTimeout(this.songTimeout)
+        if (this.hintTimeout) clearTimeout(this.hintTimeout)
         if (this.messageCollector) this.messageCollector.stop()
         if (this.voiceStream) this.voiceStream.destroy()
         if (this.musicStream) this.musicStream.destroy()
@@ -217,6 +227,7 @@ export class MusicQuiz {
 
     nextSong(status: string) {
         if (this.songTimeout) clearTimeout(this.songTimeout)
+        if (this.hintTimeout) clearTimeout(this.hintTimeout)
         status == "fucked" ? this.songs.splice(this.currentSong, 1) : this.printStatus(status)
           
         if (this.currentSong + 1 === this.songs.length) {
@@ -296,6 +307,7 @@ export class MusicQuiz {
               link: `https://open.spotify.com/track/${track.id}`,
               previewUrl: track.preview_url,
               title: track.name,
+              stripped_title: this.stripSongName(track.name),
               artist: (track.artists[0] || {}).name,
               added_by: added_by.id
           }))
@@ -367,4 +379,16 @@ export class MusicQuiz {
       
       return songs;
     }
+
+    makeHint(data: string): string {
+      return data.split('').map((char, i) => i > 0 && char != ' ' ? '-' : char ).join('');
+    }
+
+    formatHints(artist_hint: string, song_hint: string): string {
+      const top = "=".repeat(song_hint.length) + "HINTS" + "=".repeat(song_hint.length);
+      const hints = `Song: ${song_hint}\nArtist: ${artist_hint}`;
+      const bottom = "=".repeat((song_hint.length * 2) + 5);
+      return `\`\`\`${top}\n${hints}\n${bottom}\`\`\``;
+    }
+    
 }
