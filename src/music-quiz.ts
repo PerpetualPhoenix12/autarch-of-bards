@@ -166,7 +166,7 @@ export class MusicQuiz {
         let score = this.scores[message.author.id] || 0
         let correct = false
         
-        if (users[message.author.id] == song.added_by) return;
+        if (users[message.author.id] == song.added_by && this.arguments.only == 'author') return;
 
         if (!this.titleGuessed && content.includes(this.stripSongName(song.title).toLowerCase())) {
             score += 2

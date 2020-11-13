@@ -26,16 +26,16 @@ export class MusicQuizCommand extends Command {
                 },
                 {
                     key: 'only',
-                    prompt: 'Only this answer is required; artist, title or both',
+                    prompt: 'Only this answer is required; artist, title or both. Or only this person cannot guess: author.',
                     type: 'string',
-                    oneOf: ['artist', 'title', 'both'],
+                    oneOf: ['artist', 'title', 'both', 'author'],
                     default: 'both'
-                }
+                },
             ]
         })
     }
 
-    async run(message: CommandoMessage, args: QuizArgs, fromPattern: boolean): Promise<Message | Message[]> {
+    async run(message: CommandoMessage, args: QuizArgs): Promise<Message | Message[]> {
         if (message.guild.quiz) {
             return message.say('Quiz is already running')
         }
