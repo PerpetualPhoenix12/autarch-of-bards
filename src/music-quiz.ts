@@ -121,8 +121,6 @@ export class MusicQuiz {
           return;
         }
 
-
-
         this.songTimeout = setTimeout(() => {
             this.nextSong('Song was not guessed in time')
         }, 1000 * 60);
