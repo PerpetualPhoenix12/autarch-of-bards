@@ -66,7 +66,7 @@ client.registry
 
 client.once('ready', () => {
     console.log('Ready!')
-    client.user.setActivity('Ready to quiz')
+    client.user.setPresence({ activity: { name: 'my zither', type: 'LISTENING' },  status: 'online'})
 })
 client.on("error", (e) => console.error('Discord error', e))
 client.on("warn", (e) => console.warn('Discord warn', e))

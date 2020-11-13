@@ -21,7 +21,6 @@ export default class Spotify {
         
         const result = await this.client.getPlaylistTracks(id, { offset })
         
-
-        return result.body.items.map(({ track }) => track)
+        return result.body.items;
     }
 }

@@ -289,11 +289,12 @@ export class MusicQuiz {
         try {
           return (this.shuffleSongs(await spotify.getPlaylist(playlist)))
           .slice(0, amount)
-            .map(song => ({
-              link: `https://open.spotify.com/track/${song.id}`,
-              previewUrl: song.preview_url,
-              title: song.name,
-              artist: (song.artists[0] || {}).name
+            .map(({ track, added_by }) => ({
+              link: `https://open.spotify.com/track/${track.id}`,
+              previewUrl: track.preview_url,
+              title: track.name,
+              artist: (track.artists[0] || {}).name,
+              added_by: added_by.id
           }))
 
         } catch (error) {
@@ -348,8 +349,7 @@ export class MusicQuiz {
 
     }
 
-    shuffleSongs(songs: SpotifyApi.TrackObjectFull[]): SpotifyApi.TrackObjectFull[] {
-      
+    shuffleSongs(songs: SpotifyApi.PlaylistTrackObject[]): SpotifyApi.PlaylistTrackObject[] {
       let curIndex = songs.length, temp, randomIndex
     
       while (0 !== curIndex) {

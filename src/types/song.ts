@@ -3,4 +3,5 @@ export interface Song {
     previewUrl: string
     title: string
     artist: string
+    added_by: string
 }
