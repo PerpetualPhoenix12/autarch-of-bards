@@ -14,7 +14,7 @@
     "discord.js": "^12.3.1",
     "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
     "dotenv": "^8.2.0",
-    "scrape-youtube": "^2.0.1",
+    "scrape-youtube": "^2.0.7",
     "simple-youtube-api": "^5.2.1",
     "spotify-web-api-node": "^4.0.0",
     "ytdl-core": "^4.0.3",

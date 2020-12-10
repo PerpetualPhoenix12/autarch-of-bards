@@ -163,7 +163,7 @@ export class MusicQuiz {
         }
 
         if (content === skipCommand) {
-            await this.handleSkip(message.author.id)
+            this.handleSkip(message.author.id)
 
             return
         }
